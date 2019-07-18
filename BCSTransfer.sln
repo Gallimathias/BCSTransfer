@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29006.145
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BCSTransfer", "BCSTransfer\BCSTransfer.csproj", "{B421E985-2970-45F6-8302-42F1F1DAB709}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCSTransfer", "BCSTransfer\BCSTransfer.csproj", "{B421E985-2970-45F6-8302-42F1F1DAB709}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BCSTransfer.Core", "BCSTransfer.Core\BCSTransfer.Core.csproj", "{034D40E5-2FD2-42B1-8E0D-13DECFE0136F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCSTransfer.Core", "BCSTransfer.Core\BCSTransfer.Core.csproj", "{034D40E5-2FD2-42B1-8E0D-13DECFE0136F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BCSTransfer.Sqlite", "BCSTransfer.Sqlite\BCSTransfer.Sqlite.csproj", "{C70B4201-DC5A-4CC8-ADC3-D10F67FC4A55}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{034D40E5-2FD2-42B1-8E0D-13DECFE0136F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{034D40E5-2FD2-42B1-8E0D-13DECFE0136F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{034D40E5-2FD2-42B1-8E0D-13DECFE0136F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C70B4201-DC5A-4CC8-ADC3-D10F67FC4A55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C70B4201-DC5A-4CC8-ADC3-D10F67FC4A55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C70B4201-DC5A-4CC8-ADC3-D10F67FC4A55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C70B4201-DC5A-4CC8-ADC3-D10F67FC4A55}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

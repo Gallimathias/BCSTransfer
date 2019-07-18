@@ -1,4 +1,5 @@
 ﻿using BCSTransfer.Core.KlickTippModel;
+using BCSTransfer.Core.Model;
 using BCSTransfer.Core.PretixModel;
 using NLog;
 using System;
@@ -53,38 +54,58 @@ namespace BCSTransfer.Core
 
             foreach (var position in positions)
             {
+                var contact = new Contact()
+                {
+                    PretixId = position.Id,
+                    PretixPositionId = position.Positionid,
+                    PretixOrder = position.Order,
+                    TwitterHandel = GetTwitterName(position.Answers.FirstOrDefault(a => a.Question == TwitterQuestionId))
+                };
+
                 if (string.IsNullOrWhiteSpace(position.AttendeeEmail))
                     position.AttendeeEmail = orders.FirstOrDefault(o => o.Code == position.Order).Email;
 
-                if (!await klickTippClient.TryTagUserByMail(position.AttendeeEmail))
+                if (await klickTippClient.TryTagUserByMail(position.AttendeeEmail))
                 {
-                    if (string.IsNullOrWhiteSpace(position.AttendeeEmail))
-                        continue;
+                    contact.TagedByKlickTipp = true;
+                    continue;
+                }
 
-                    var sub = new Subscriber
-                    {
-                        Email = position.AttendeeEmail,
-                        TwitterHandel = GetTwitterName(position.Answers.FirstOrDefault(a => a.Question == TwitterQuestionId))
-                    };
+                if (string.IsNullOrWhiteSpace(position.AttendeeEmail))
+                    continue;
 
-                    string keyFirstName = "first_name";
-                    string keyLastName = "last_name";
+                var sub = new Subscriber
+                {
+                    Email = position.AttendeeEmail,
+                    TwitterHandel = contact.TwitterHandel
+                };
 
-                    if (position.AttendeeNameParts.TryGetValue("_scheme", out var schema))
-                    {
-                        var raw = schema.Split('_');
-                        keyFirstName = raw[0] + "_name";
-                        keyLastName = raw[1] + "_name";
-                    }
+                string keyFirstName = "first_name";
+                string keyLastName = "last_name";
+
+                if (position.AttendeeNameParts.TryGetValue("_scheme", out var schema))
+                {
+                    var raw = schema.Split('_');
+                    keyFirstName = raw[0] + "_name";
+                    keyLastName = raw[1] + "_name";
+                }
 
 
-                    if (position.AttendeeNameParts.TryGetValue(keyFirstName, out var firstName))
-                        sub.FirstName = firstName;
+                if (position.AttendeeNameParts.TryGetValue(keyFirstName, out var firstName))
+                    sub.FirstName = firstName;
 
-                    if (position.AttendeeNameParts.TryGetValue(keyLastName, out var lastName))
-                        sub.LastName = lastName;
+                if (position.AttendeeNameParts.TryGetValue(keyLastName, out var lastName))
+                    sub.LastName = lastName;
 
+                try
+                {
                     await klickTippClient.CreateSubscriber(sub);
+                    contact.TagedByKlickTipp = true;
+                }
+                catch (Exception ex)
+                {
+                    logger.Trace(ex.Message);
+                    logger.Error("Can not create subscriber in KlickTipp");
                 }
             }
 
@@ -97,7 +118,9 @@ namespace BCSTransfer.Core
             {
                 try
                 {
-                    await TransferContact(Organizer, Event);                    
+                    logger.Info("Start Transfer");
+                    await TransferContact(Organizer, Event);
+                    logger.Info("End Transfer");
                 }
                 catch (TaskCanceledException ex)
                 {
