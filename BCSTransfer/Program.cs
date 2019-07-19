@@ -88,7 +88,7 @@ namespace BCSTransfer
                 TwitterQuestionId = configuration.TwitterQuestionId
             };
 
-            using var semaphore = new SemaphoreSlim(0, 1);
+             var semaphore = new SemaphoreSlim(0, 1);
             Console.CancelKeyPress += (s, e) =>
             {
                 logger.Info("Stop application");
@@ -115,6 +115,7 @@ namespace BCSTransfer
             });
 
             semaphore.Wait();
+            semaphore.Dispose();
         }
     }
 }
