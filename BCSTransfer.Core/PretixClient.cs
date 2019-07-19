@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace BCSTransfer.Core
 {
-    public class PretixClient : ApiClient
+    public class PretixClient : ApiClient, IPretixClient
     {
         public string Token { private get; set; }
         public Organizer[] Organisations { get; private set; }

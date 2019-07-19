@@ -13,7 +13,7 @@ using NLog;
 
 namespace BCSTransfer.Core
 {
-    public class KlickTippClient : ApiClient
+    public class KlickTippClient : ApiClient, IKlickTippClient
     {
         public override string BaseAddress => "https://www.klick-tipp.com/api/";
 
@@ -47,7 +47,7 @@ namespace BCSTransfer.Core
             {
                 Authenticatet = response.StatusCode == HttpStatusCode.OK;
 
-                var content = await response.Content.ReadAsStringAsync();                
+                var content = await response.Content.ReadAsStringAsync();
 
                 if (Authenticatet)
                 {

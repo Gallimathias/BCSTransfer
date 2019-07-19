@@ -11,18 +11,18 @@ using System.Threading.Tasks;
 
 namespace BCSTransfer.Core
 {
-    public class TransferClient
+    public class TransferClient : ITransferClient
     {
         public Organizer Organizer { get; set; }
         public Event Event { get; set; }
         public int TwitterQuestionId { get; set; }
 
         private readonly Logger logger;
-        private readonly PretixClient pretixClient;
-        private readonly KlickTippClient klickTippClient;
+        private readonly IPretixClient pretixClient;
+        private readonly IKlickTippClient klickTippClient;
         private CancellationTokenSource tokenSource;
 
-        public TransferClient(PretixClient pretixClient, KlickTippClient klickTippClient)
+        public TransferClient(IPretixClient pretixClient, IKlickTippClient klickTippClient)
         {
             logger = LogManager.GetCurrentClassLogger();
             this.pretixClient = pretixClient;

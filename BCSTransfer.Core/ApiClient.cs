@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace BCSTransfer.Core
 {
-    public abstract class ApiClient
+    public abstract class ApiClient : IApiClient
     {
-        public abstract string BaseAddress { get;  }
+        public abstract string BaseAddress { get; }
         public bool Authenticatet { get; protected set; }
 
         protected readonly HttpClient httpClient;
