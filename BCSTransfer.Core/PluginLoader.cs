@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BCSTransfer.Core
 {
-    internal class PluginLoader : IDisposable, IPluginLoader
+    public class PluginLoader : IDisposable, IPluginLoader
     {
         public Dictionary<string, PluginInformation> Plugins { get; }
 
@@ -17,6 +18,7 @@ namespace BCSTransfer.Core
         {
             this.typeContainer = typeContainer;
             Plugins = new Dictionary<string, PluginInformation>();
+
         }
 
 
@@ -24,7 +26,8 @@ namespace BCSTransfer.Core
         {
             foreach (KeyValuePair<string, string> pluginData in plugins)
             {
-                var assembly = Assembly.LoadFile(pluginData.Value);
+                var pluginPath = Path.GetFullPath(pluginData.Value);
+                var assembly = Assembly.LoadFile(pluginPath);
                 IEnumerable<Type> pluginProviderTypes = assembly
                      .GetTypes()
                      .Where(t => typeof(IPluginProvider).IsAssignableFrom(t));
@@ -73,6 +76,11 @@ namespace BCSTransfer.Core
             public Assembly Assembly { get; set; }
             public IPluginProvider Provider { get; set; }
 
+            public PluginInformation()
+            {
+                AppDomain.CurrentDomain.AssemblyResolve += DomainAssemblyResolve;
+            }
+
             public Task UnInitalize()
                 => Provider.UnInitalize();
 
@@ -82,6 +90,19 @@ namespace BCSTransfer.Core
 
                 Assembly = null;
                 Provider = null;
+            }
+
+            private Assembly DomainAssemblyResolve(object sender, ResolveEventArgs args)
+            {
+                var splited = args.Name.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                var fileInfo = new FileInfo(Assembly.Location);
+                var targetInfo = new FileInfo(Path.Combine(fileInfo.Directory.FullName, splited[0] + ".dll"));
+                
+                if (targetInfo.Exists)
+                    return Assembly.LoadFile(targetInfo.FullName);
+                else
+                    return null;
             }
         }
     }
