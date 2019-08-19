@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>C:\Projects\Privat\BCSTransfer\bin\DEBUG\netcoreapp2.2\plugins\</OutputPath>
+    <OutputPath>..\bin\DEBUG\netcoreapp2.2\plugins\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
