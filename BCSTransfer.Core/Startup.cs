@@ -10,6 +10,8 @@ namespace BCSTransfer.Core
         {
             typeContainer.Register<TransferClient, TransferClient>(InstanceBehaviour.Singleton);
             typeContainer.Register<ITransferClient, TransferClient>(InstanceBehaviour.Singleton);
+            typeContainer.Register<PluginLoader, PluginLoader>(InstanceBehaviour.Singleton);
+            typeContainer.Register<IPluginLoader, PluginLoader>(InstanceBehaviour.Singleton);
         }
     }
 }

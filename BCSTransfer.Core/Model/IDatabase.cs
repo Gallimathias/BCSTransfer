@@ -7,6 +7,7 @@ namespace BCSTransfer.Core.Model
         DbSet<Setting> Settings { get; }
         DbSet<Contact> Contacts { get; }
 
+        bool EnsureCreated();
         IDatabase GetEnsureDatabase(string source);
     }
 }
