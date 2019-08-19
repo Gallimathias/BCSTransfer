@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BCSTransfer.Core
 {
-    internal class PluginLoader : IDisposable
+    internal class PluginLoader : IDisposable, IPluginLoader
     {
         public Dictionary<string, PluginInformation> Plugins { get; }
 
