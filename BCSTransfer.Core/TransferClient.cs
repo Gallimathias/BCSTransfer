@@ -15,18 +15,23 @@ namespace BCSTransfer.Core
     {
         public Organizer Organizer { get; set; }
         public Event Event { get; set; }
-        public int TwitterQuestionId { get; set; }
+        public int TwitterQuestionId { get; }
 
+        private readonly IDatabase database;
         private readonly Logger logger;
         private readonly IPretixClient pretixClient;
         private readonly IKlickTippClient klickTippClient;
         private CancellationTokenSource tokenSource;
 
-        public TransferClient(IPretixClient pretixClient, IKlickTippClient klickTippClient)
+        public TransferClient(IPretixClient pretixClient, IKlickTippClient klickTippClient,
+            IConfiguration configuration, IDatabase database)
         {
             logger = LogManager.GetCurrentClassLogger();
             this.pretixClient = pretixClient;
             this.klickTippClient = klickTippClient;
+            TwitterQuestionId = configuration.TwitterQuestionId;
+
+            this.database = database;
         }
 
         public Task Start()
@@ -46,7 +51,7 @@ namespace BCSTransfer.Core
             tokenSource = null;
         }
 
-        private async Task TransferContact(Organizer organizer, Event @event)
+        private async Task TransferContact(Organizer organizer, Event @event, CancellationToken token)
         {
             logger.Debug("Start Transfer Contacts");
             var orders = await pretixClient.GetOrders(organizer, @event);
@@ -54,13 +59,24 @@ namespace BCSTransfer.Core
 
             foreach (var position in positions)
             {
-                var contact = new Contact()
+                var contact = database.Contacts.FirstOrDefault(c => c.PretixId == position.Id);
+
+                if (contact == null)
                 {
-                    PretixId = position.Id,
-                    PretixPositionId = position.Positionid,
-                    PretixOrder = position.Order,
-                    TwitterHandel = GetTwitterName(position.Answers.FirstOrDefault(a => a.Question == TwitterQuestionId))
-                };
+                    contact = new Contact()
+                    {
+                        PretixId = position.Id,
+                        PretixPositionId = position.Positionid,
+                        PretixOrder = position.Order
+                    };
+
+                    database.Contacts.Add(contact);                    
+                }
+
+                contact.TwitterHandel = GetTwitterName(position.Answers.FirstOrDefault(a => a.Question == TwitterQuestionId));
+
+                if (contact.TagedByKlickTipp)
+                    continue;
 
                 if (string.IsNullOrWhiteSpace(position.AttendeeEmail))
                     position.AttendeeEmail = orders.FirstOrDefault(o => o.Code == position.Order).Email;
@@ -107,8 +123,11 @@ namespace BCSTransfer.Core
                     logger.Trace(ex.Message);
                     logger.Error("Can not create subscriber in KlickTipp");
                 }
+
+                database.Contacts.Update(contact);
             }
 
+            await database.SaveChanges(token);
             logger.Debug("Stop Transfer Contacts");
         }
 
@@ -119,7 +138,7 @@ namespace BCSTransfer.Core
                 try
                 {
                     logger.Info("Start Transfer");
-                    await TransferContact(Organizer, Event);
+                    await TransferContact(Organizer, Event, token);
                     logger.Info("End Transfer");
                 }
                 catch (TaskCanceledException ex)

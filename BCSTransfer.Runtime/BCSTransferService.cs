@@ -18,7 +18,7 @@ namespace BCSTransfer.Runtime
 {
     public class BCSTransferService : IDisposable
     {
-        private TransferClient transferClient;
+        private ITransferClient transferClient;
         private readonly SemaphoreSlim semaphore;
         private readonly ITypeContainer typeContainer;
         private Logger logger;
@@ -60,6 +60,8 @@ namespace BCSTransfer.Runtime
         {
             var pretix = new PretixClient(configuration.Token);
             klickTipp = new KlickTippClient(configuration.TagId, configuration.ListId);
+            typeContainer.Register<IPretixClient>(pretix);
+            typeContainer.Register<IKlickTippClient>(klickTipp);
 
             try
             {
@@ -96,13 +98,9 @@ namespace BCSTransfer.Runtime
                 return false;
             }
 
-            transferClient = new TransferClient(pretix, klickTipp)
-            {
-                Event = pretixEvent,
-                Organizer = organisation,
-                TwitterQuestionId = configuration.TwitterQuestionId
-            };
-
+            transferClient = typeContainer.Get<ITransferClient>();
+            transferClient.Event = pretixEvent;
+            transferClient.Organizer = organisation;
             return true;
         }
 
@@ -128,6 +126,7 @@ namespace BCSTransfer.Runtime
         public void Dispose()
         {
             semaphore.Dispose();
+            typeContainer.Dispose();
         }
 
         private void Start()
@@ -165,7 +164,7 @@ namespace BCSTransfer.Runtime
                 return;
             }
 
-            typeContainer.Register(configuration);
+            typeContainer.Register<IConfiguration>(configuration);
 
             var config = new LoggingConfiguration();
 
