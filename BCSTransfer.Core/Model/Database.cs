@@ -14,6 +14,9 @@ namespace BCSTransfer.Core.Model
         {
         }
 
+        public bool EnsureCreated() 
+            => Database.EnsureCreated();
+
         public abstract IDatabase GetEnsureDatabase(string source);
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
