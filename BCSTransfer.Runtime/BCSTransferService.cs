@@ -28,13 +28,19 @@ namespace BCSTransfer.Runtime
 
         public BCSTransferService()
         {
-            semaphore = new SemaphoreSlim(0, 1);
+            semaphore = new SemaphoreSlim(1, 1);
             typeContainer = TypeContainer.Get<ITypeContainer>();
         }
 
         public async Task Run(CancellationToken token)
         {
-            token.Register(() => Task.Run(Stop));
+            token.Register(() =>
+            {
+                var task = Task.Run(Stop);
+                task.Wait();
+            });
+
+            await MockPluginManager.Load(TypeContainer.Get<ITypeContainer>());
 
             Start();
             logger.Info("Start initialization");
@@ -47,9 +53,7 @@ namespace BCSTransfer.Runtime
             logger.Info("Initialization successfull");
 
             await transferClient.Start();
-
-            semaphore.Wait();
-
+            await Task.Delay(-1, token);
         }
 
         private async Task<bool> Initalization()
@@ -115,8 +119,10 @@ namespace BCSTransfer.Runtime
             {
                 logger.Error(ex, "Exception on closing application");
             }
-            Thread.Sleep(100);
-            semaphore.Release();
+
+            await MockPluginManager.Unload();
+
+            await Task.Delay(100);
         }
 
         public void Dispose()
@@ -127,10 +133,10 @@ namespace BCSTransfer.Runtime
         private void Start()
         {
             Startup.Register(typeContainer);
-            
+
             if (!TryGetFromFile<Dictionary<string, string>>(Path.Combine(".", "init.json"), out var initPaths))
                 initPaths = new Dictionary<string, string>();
-            
+
             if (initPaths.TryGetValue("Plugins", out var pluginPath))
             {
                 pluginLoader = typeContainer.Get<IPluginLoader>();
@@ -144,14 +150,17 @@ namespace BCSTransfer.Runtime
                 var dbProvider = typeContainer.Get<IDatabaseProvider>();
                 var dbContext = dbProvider.GetDatabaseContext(dbPath);
                 typeContainer.Register(dbContext);
-                configuration = Configuration.FromDatabase(typeContainer.Get<IDatabase>());
+                var database = typeContainer.Get<IDatabase>();
+                database.EnsureCreated();
+
+                configuration = Configuration.FromDatabase(database);
             }
             else if (initPaths.TryGetValue("Configuration", out var configPath))
             {
                 if (!TryGetFromFile(configPath, out configuration))
                     return;
             }
-            else if(!TryGetFromFile(Path.Combine(".", "config.json"), out configuration))
+            else if (!TryGetFromFile(Path.Combine(".", "config.json"), out configuration))
             {
                 return;
             }
@@ -169,6 +178,8 @@ namespace BCSTransfer.Runtime
             LogManager.Configuration = config;
 
             logger = LogManager.GetCurrentClassLogger();
+
+            AppDomain.CurrentDomain.UnhandledException += (s, e) => logger.Fatal("Fatal Exception occures crash", e.ExceptionObject);
         }
 
         private bool TryGetFromFile<T>(string path, out T value) where T : new()

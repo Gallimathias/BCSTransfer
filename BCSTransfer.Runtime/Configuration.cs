@@ -54,7 +54,7 @@ namespace BCSTransfer.Runtime
             EventSlug = database.Settings.Find(nameof(EventSlug)).Value,
             TwitterQuestionId = int.Parse(database.Settings.Find(nameof(TwitterQuestionId)).Value),
             LogLevel = database.Settings.Find(nameof(LogLevel)).Value,
-        }
+        };
 
     }
 }
