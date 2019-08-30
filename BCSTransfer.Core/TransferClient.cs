@@ -70,7 +70,8 @@ namespace BCSTransfer.Core
                         PretixOrder = position.Order
                     };
 
-                    database.Contacts.Add(contact);                    
+                    database.Contacts.Add(contact);
+                    await database.SaveChanges(token);
                 }
 
                 contact.TwitterHandel = GetTwitterName(position.Answers.FirstOrDefault(a => a.Question == TwitterQuestionId));
@@ -115,6 +116,7 @@ namespace BCSTransfer.Core
 
                 try
                 {
+                    logger.Debug("Try to create subscriber");
                     await klickTippClient.CreateSubscriber(sub);
                     contact.TagedByKlickTipp = true;
                 }
