@@ -7,7 +7,7 @@ namespace BCSTransfer.Core
     {
         Event Event { get; set; }
         Organizer Organizer { get; set; }
-        int TwitterQuestionId { get; set; }
+        int TwitterQuestionId { get; }
 
         string GetTwitterName(Answer answer);
         Task Start();

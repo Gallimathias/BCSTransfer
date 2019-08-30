@@ -1,11 +1,12 @@
-﻿using BCSTransfer.Core.Model;
+﻿using BCSTransfer.Core;
+using BCSTransfer.Core.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace BCSTransfer.Runtime
 {
-    public class Configuration
+    public class Configuration : IConfiguration
     {
         public string Token { get; set; }
         public int ListId { get; set; }
@@ -22,15 +23,15 @@ namespace BCSTransfer.Runtime
 
         public void StoreIn(IDatabase database)
         {
-            AddOrUpdate(database, nameof(Token), Token);           
-            AddOrUpdate(database, nameof(ListId), ListId.ToString());           
-            AddOrUpdate(database, nameof(TagId), TagId.ToString());           
-            AddOrUpdate(database, nameof(KlickTippPassword), KlickTippPassword);           
-            AddOrUpdate(database, nameof(KlickTippUsername), KlickTippUsername);           
-            AddOrUpdate(database, nameof(OrganisationSlug), OrganisationSlug);           
-            AddOrUpdate(database, nameof(EventSlug), EventSlug);           
-            AddOrUpdate(database, nameof(TwitterQuestionId), TwitterQuestionId.ToString());           
-            AddOrUpdate(database, nameof(LogLevel), LogLevel);           
+            AddOrUpdate(database, nameof(Token), Token);
+            AddOrUpdate(database, nameof(ListId), ListId.ToString());
+            AddOrUpdate(database, nameof(TagId), TagId.ToString());
+            AddOrUpdate(database, nameof(KlickTippPassword), KlickTippPassword);
+            AddOrUpdate(database, nameof(KlickTippUsername), KlickTippUsername);
+            AddOrUpdate(database, nameof(OrganisationSlug), OrganisationSlug);
+            AddOrUpdate(database, nameof(EventSlug), EventSlug);
+            AddOrUpdate(database, nameof(TwitterQuestionId), TwitterQuestionId.ToString());
+            AddOrUpdate(database, nameof(LogLevel), LogLevel);
         }
 
         private void AddOrUpdate(IDatabase database, string name, string value)
